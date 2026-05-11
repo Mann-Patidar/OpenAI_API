@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chatbot UI</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:white;
+    }
+
+    .container{
+      width:90%;
+      max-width:900px;
+      height:90vh;
+      background:#1e293b;
+      border-radius:16px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border:1px solid #334155;
+    }
+
+    .header{
+      padding:20px;
+      background:#111827;
+      border-bottom:1px solid #334155;
+      font-size:22px;
+      font-weight:bold;
+      text-align:center;
+    }
+
+    .chat-box{
+      flex:1;
+      padding:20px;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+    }
+
+    .message{
+      max-width:75%;
+      padding:14px 16px;
+      border-radius:14px;
+      line-height:1.6;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+
+    .user{
+      align-self:flex-end;
+      background:#2563eb;
+    }
+
+    .bot{
+      align-self:flex-start;
+      background:#374151;
+    }
+
+    .input-area{
+      padding:15px;
+      background:#111827;
+      border-top:1px solid #334155;
+      display:flex;
+      gap:10px;
+    }
+
+    textarea{
+      flex:1;
+      resize:none;
+      border:none;
+      outline:none;
+      border-radius:12px;
+      padding:14px;
+      font-size:16px;
+      background:#1e293b;
+      color:white;
+    }
+
+    textarea::placeholder{
+      color:#94a3b8;
+    }
+
+    button{
+      border:none;
+      outline:none;
+      padding:0 22px;
+      border-radius:12px;
+      background:#10b981;
+      color:white;
+      cursor:pointer;
+      font-size:16px;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#059669;
+    }
+
+    .chat-box::-webkit-scrollbar{
+      width:8px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb{
+      background:#475569;
+      border-radius:10px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      My AI Chatbot
+    </div>
+
+    <div class="chat-box" id="chatBox">
+
+      <div class="message bot">
+        Hello 👋  
+        How can I help you today?
+      </div>
+
+    </div>
+
+    <div class="input-area">
+
+      <textarea
+        id="prompt"
+        rows="2"
+        placeholder="Type your message..."
+      ></textarea>
+
+      <button id="sendBtn">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const chatBox = document.getElementById("chatBox");
+    const promptInput = document.getElementById("prompt");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Add message to UI
+    function addMessage(text, sender){
+
+      const messageDiv = document.createElement("div");
+
+      messageDiv.classList.add("message");
+      messageDiv.classList.add(sender);
+
+      messageDiv.textContent = text;
+
+      chatBox.appendChild(messageDiv);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Send button click
+    sendBtn.addEventListener("click", async () => {
+
+      const message = promptInput.value.trim();
+
+      if(message === "") return;
+
+      // Add user message
+      addMessage(message, "user");
+
+      // Clear input
+      promptInput.value = "";
+
+      // TODO:
+      // Call your FastAPI backend here
+
+      // Example bot response for testing UI
+    try {
+
+    const response = await fetch(
+        "http://127.0.0.1:8000/chat",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+        }
+    );
+
+    const data = await response.json();
+
+    addMessage(data.reply, "bot");
+
+    }
+    catch(error){
+
+      addMessage("Error connecting to server", "bot");
+    } 
+
+    });
+
+    // Press Enter to send
+    promptInput.addEventListener("keydown", (e) => {
+
+      if(e.key === "Enter" && !e.shiftKey){
+
+        e.preventDefault();
+        sendBtn.click();
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
